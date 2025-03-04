@@ -1,2 +1,2 @@
 # nestjs_clean_architecture
-Clean and organized folder structure
+A powerful and scalable backend built with Next.js and Node.js, ready for production.
