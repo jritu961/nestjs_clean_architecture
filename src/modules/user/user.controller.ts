@@ -1,9 +1,9 @@
 import { Controller, Post, Get, Body, Param, Request, UseGuards } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dtos/register.dto';
-import { RolesGuard } from './roles.guard';
 import { Roles } from './roles.decorator';
 import { AuthGuard } from '@nestjs/passport';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 @Controller('users')
 export class UserController {
@@ -21,9 +21,17 @@ export class UserController {
     return this.userService.login(req.body);
   }
 
+  @Post('logout')
+  @UseGuards(JwtAuthGuard)
+  async logout(@Request() req) {
+  console.log("req.user",req.user)
+  return this.userService.logout(req.user);
+}
+
+
   // Protected route for admin only
   @Get('admin-data')
-  @UseGuards(AuthGuard('jwt'), RolesGuard) // JWT Auth first, then Role Guard
+  @UseGuards(AuthGuard('jwt'), JwtAuthGuard) // JWT Auth first, then Role Guard
   @Roles('admin')
   getAdminData() {
     return { message: 'This is protected admin data' };
@@ -31,7 +39,7 @@ export class UserController {
 
   // Protected route for both users and admins
   @Get('profile')
-  @UseGuards(RolesGuard)
+  @UseGuards(JwtAuthGuard)
   @Roles('user', 'admin')
   getProfile(@Request() req) {
     return req.user;

@@ -81,6 +81,14 @@ export class UserService {
     };
   }
 
+  async logout(user: any) {
+    console.log("userrr",user)
+    return {
+      status: true,
+      message: 'Logout successful',
+    };
+  }
+  
   async getAllUsers(): Promise<User[]> {
     return this.userRepository.find();
   }

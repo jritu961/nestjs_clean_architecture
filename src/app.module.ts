@@ -3,11 +3,22 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import * as Joi from 'joi';
 import { UserModule } from './modules/user/user.module';
+import { ProfileModule } from './modules/profile/profile.module';
+
 @Module({
   imports: [
     ConfigModule.forRoot({
-      isGlobal:true // Makes .env available globally
+      isGlobal: true,
+      validationSchema: Joi.object({
+        DATABASE_HOST: Joi.string().required(),
+        DATABASE_PORT: Joi.number().required(),
+        DATABASE_USER: Joi.string().required(),
+        DATABASE_PASSWORD: Joi.string().required(),
+        DATABASE_NAME: Joi.string().required(),
+        NODE_ENV: Joi.string().valid('development', 'production').default('development'),
+      }),
     }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
@@ -24,7 +35,7 @@ import { UserModule } from './modules/user/user.module';
       }),
     }),
     UserModule,
-
+    ProfileModule,
   ],
   controllers: [AppController],
   providers: [AppService],

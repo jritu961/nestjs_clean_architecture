@@ -1,20 +1,21 @@
 // src/users/user.entity.ts
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
 
 export enum Role {
   USER = 'user',
   ADMIN = 'admin',
 }
 
-@Entity('users')
+
+@Entity()
 export class User {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ length: 255 })
+  @Column()
   username: string;
 
-  @Column({ unique: true, length: 255 })
+  @Column()
   email: string;
 
   @Column()
@@ -26,6 +27,13 @@ export class User {
     default: Role.USER,
   })
   role: Role;
-}
 
-// I added some improvements like setting a unique constraint on the email, adding string length limits, and specifying the table name explicitly. Let me know if you want any changes! 🚀
+  @Column({ nullable: true })
+  firstName: string;
+
+  @Column({ nullable: true })
+  lastName: string;
+
+  @Column({ nullable: true })
+  phone: string;
+}
