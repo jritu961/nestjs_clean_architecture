@@ -5,6 +5,7 @@ import * as bcrypt from 'bcrypt';
 import { Role, User } from './user.entity';
 import { CreateUserDto } from './dtos/register.dto';
 import { JwtService } from '@nestjs/jwt';
+import { Profile } from '../profile/profile.entity';
 
 @Injectable()
 export class UserService {
@@ -12,38 +13,60 @@ export class UserService {
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
     private readonly jwtService: JwtService,
+    @InjectRepository(Profile)  
+    private readonly profileRepository:Repository<Profile>
   ) {}
 
-  // Create a new user
   async createUser(createUserDto: CreateUserDto): Promise<User> {
-    const { username, email, password, role } = createUserDto;
+    const { username,firstName,lastName, email,phone, password, role } = createUserDto;
   
     if (!username || !email || !password) {
       throw new BadRequestException('Required fields are missing');
     }
   
+    // Check if the user already exists
     const existingUser = await this.userRepository.findOne({ where: { email } });
-  
     if (existingUser) {
       throw new BadRequestException('Email already registered');
     }
   
+    // Hash the password
     const hashedPassword = await bcrypt.hash(password, 10);
   
+    // Validate role, default to USER
     const validRole: Role = role && Object.values(Role).includes(role) ? role : Role.USER;
-
+  
+    // Create new user
     const newUser = this.userRepository.create({
       username,
+      firstName,
+      lastName,
+      phone,
       email,
       password: hashedPassword,
-      role: validRole as Role, // Cast to Role
+      role: validRole as Role,
     });
   
-    return await this.userRepository.save(newUser);
+    // Save user first
+    const savedUser = await this.userRepository.save(newUser);
+  
+    // Automatically create a profile for the user
+    // Automatically create a profile for the user
+const newProfile = this.profileRepository.create({
+  user: savedUser,  
+  firstName,   // ✅ Assign firstName
+  lastName,    // ✅ Assign lastName
+  bio: '',     // ✅ Provide a default value or take from DTO
+  profilePicture: '',  // ✅ Default or take from DTO
+});
+
+// Save profile
+await this.profileRepository.save(newProfile);
+
+  
+    return savedUser;  // Return the saved user (profile will be accessible via relations)
   }
   
-  
-
   async validateUser(email: string, password: string): Promise<any> {
     const user = await this.findByUserEmail(email);
     if (user && (await bcrypt.compare(password, user.password))) {

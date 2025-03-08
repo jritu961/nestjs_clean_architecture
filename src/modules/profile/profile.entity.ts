@@ -18,7 +18,7 @@ export class Profile {
   @Column({ nullable: true })
   profilePicture: string;
 
-  @OneToOne(() => User)
+  @OneToOne(() => User, (user) => user.profile, { onDelete: 'CASCADE' })
   @JoinColumn()
   user: User;
 }

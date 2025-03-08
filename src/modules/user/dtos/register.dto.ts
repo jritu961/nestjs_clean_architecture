@@ -15,4 +15,20 @@ export class CreateUserDto {
   @IsOptional()
   @IsEnum(Role, { message: 'Role must be either "user" or "admin"' })
   role?: Role;
+
+  @IsOptional()
+  @IsString()
+  firstName?: string;
+
+  @IsOptional()
+  @IsString()
+  lastName?: string;
+
+  @IsOptional()
+  @IsString()
+  phone?: string;
+
+  @IsOptional()
+  @IsString()
+  profilePicture?: string; 
 }
