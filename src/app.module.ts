@@ -7,6 +7,7 @@ import * as Joi from 'joi';
 import { UserModule } from './modules/user/user.module';
 import { DocumentModule } from './modules/document/document.module';
 import { CloudinaryProvider } from './modules/utils/cloudinary.config';
+import { IngestionModule } from './modules/ingestion/ingestion.module';
 
 @Module({
   imports: [
@@ -36,7 +37,8 @@ import { CloudinaryProvider } from './modules/utils/cloudinary.config';
       }),
     }),
     UserModule,
-    DocumentModule 
+    DocumentModule,
+    IngestionModule
   ],
   controllers: [AppController],
   providers: [AppService,CloudinaryProvider],
