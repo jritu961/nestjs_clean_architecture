@@ -1,43 +1,38 @@
 import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { Ingestion } from './ingestion.entity';
-import { HttpService } from '@nestjs/axios';
+
+export interface IngestionStatus { // ✅ Make sure this interface is exported
+  status: 'Processing' | 'Completed' | 'Failed';
+  embeddings?: number[];
+  id?:number
+}
 
 @Injectable()
 export class IngestionService {
-  constructor(
-    @InjectRepository(Ingestion)  // ✅ Inject TypeORM Repository correctly
-    private readonly ingestionRepository: Repository<Ingestion>,
-    private readonly httpService: HttpService, // ✅ Ensure HttpService is injected properly
-  ) {}
+  private ingestionStore: Record<number, IngestionStatus> = {};
 
-  async triggerIngestion(documentId: number) {
-    const ingestion = this.ingestionRepository.create({ documentId, status: 'pending' });
-    await this.ingestionRepository.save(ingestion);
+  async triggerIngestion(documentId: number): Promise<IngestionStatus> { // ✅ Explicit return type
+    this.ingestionStore[documentId] = { status: 'Processing' };
 
-    try {
-      const response = await this.httpService
-        .post('http://localhost:3001/api/ingest', { documentId }) // Call mock service
-        .toPromise();
+    setTimeout(() => {
+      const isSuccess = Math.random() > 0.2;
+      this.ingestionStore[documentId] = {
+        status: isSuccess ? 'Completed' : 'Failed',
+        embeddings: isSuccess ? this.generateMockEmbeddings() : undefined,
+      };
+    }, 5000);
 
-      ingestion.status = 'in_progress';
-      await this.ingestionRepository.save(ingestion);
-
-      return { message: 'Ingestion started successfully', ingestionId: ingestion.id };
-    } catch (error) {
-      ingestion.status = 'failed';
-      ingestion.errorMessage = error.message;
-      await this.ingestionRepository.save(ingestion);
-      throw new Error('Failed to trigger ingestion');
-    }
+    return { status: 'Processing', id:documentId };
   }
 
-  async checkIngestionStatus(ingestionId: number) {
-    const ingestion = await this.ingestionRepository.findOne({ where: { id: ingestionId } }); // ✅ Fix findOne usage
-    if (!ingestion) {
-      throw new Error('Ingestion not found');
-    }
-    return ingestion;
+  async checkIngestionStatus(documentId: number): Promise<IngestionStatus | { status: 'Not Found' }> { // ✅ Explicit return type
+    return this.ingestionStore[documentId] || { status: 'Not Found' };
+  }
+
+  async getMockEmbeddings(documentId: number): Promise<number[] | { message: string }> { // ✅ Explicit return type
+    return this.ingestionStore[documentId]?.embeddings || { message: 'Embeddings not available' };
+  }
+
+  private generateMockEmbeddings(): number[] {
+    return Array.from({ length: 10 }, () => Math.random());
   }
 }
