@@ -1,21 +1,21 @@
-import { Controller, Post, Get, Body, Param, Request, UseGuards } from '@nestjs/common';
+import { Controller, Post, Get, Put, Body, Param, Request, UseGuards } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dtos/register.dto';
-import { Roles } from './roles.decorator';
+import { Roles } from '../auth/roles.decorator';
 import { AuthGuard } from '@nestjs/passport';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { RolesGuard } from '../auth/roles.guard';
+import { UpdateUserDto } from './dtos/update-user.dto';
 
 @Controller('users')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  // Create a new user
   @Post('create')
   async createUser(@Body() createUserDto: CreateUserDto) {
     return this.userService.createUser(createUserDto);
   }
 
-  // User login
   @Post('login')
   async login(@Request() req) {
     return this.userService.login(req.body);
@@ -24,38 +24,34 @@ export class UserController {
   @Post('logout')
   @UseGuards(JwtAuthGuard)
   async logout(@Request() req) {
-  console.log("req.user",req.user)
-  return this.userService.logout(req.user);
-}
+    return this.userService.logout(req.user);
+  }
 
+  // ✅ Update User (Admin can update any user, Users can update their own profile)
+  @Put('update/:id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin', 'editor') 
+  async updateUser(@Param('id') id: number, @Body() updateUserDto: UpdateUserDto, @Request() req) {
+    return this.userService.updateUser(id, updateUserDto, req.user);
+  }
 
-  // Protected route for admin only
-  @Get('admin-data')
-  @UseGuards(AuthGuard('jwt'), JwtAuthGuard) // JWT Auth first, then Role Guard
+  @Get('all')
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')
-  getAdminData() {
-    return { message: 'This is protected admin data' };
-  }
-
-  // Protected route for both users and admins
-  @Get('profile')
-  @UseGuards(JwtAuthGuard)
-  @Roles('user', 'admin')
-  getProfile(@Request() req) {
-    return req.user;
-  }
-
-  // Get all users
-  @Get()
   async getAllUsers() {
     return this.userService.getAllUsers();
   }
 
-  // Get user by ID
   @Get(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin', 'editor','viewer')
   async getUserById(@Param('id') id: number) {
     return this.userService.getUserById(id);
   }
-}
 
-// Let me know if you want me to refine anything further! 🚀
+  @Get('profile')
+  @UseGuards(JwtAuthGuard)
+  async getProfile(@Request() req) {
+    return this.userService.getUserById(req.user.sub);
+  }
+}

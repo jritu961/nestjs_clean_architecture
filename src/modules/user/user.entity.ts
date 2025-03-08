@@ -1,11 +1,13 @@
 // src/users/user.entity.ts
 import { Entity, Column, PrimaryGeneratedColumn, OneToOne } from 'typeorm';
-import { Profile } from '../profile/profile.entity';
 
 export enum Role {
-  USER = 'user',
   ADMIN = 'admin',
+  EDITOR = 'editor',
+  VIEWER = 'viewer',
+  USER= 'user'
 }
+
 
 
 @Entity()
@@ -25,7 +27,7 @@ export class User {
   @Column({
     type: 'enum',
     enum: Role,
-    default: Role.USER,
+    default: Role.VIEWER,
   })
   role: Role;
 
@@ -38,6 +40,5 @@ export class User {
   @Column({ nullable: true })
   phone: string;
 
-  @OneToOne(() => Profile, (profile) => profile.user, { cascade: true, eager: true })
-  profile: Profile;
+  
 }

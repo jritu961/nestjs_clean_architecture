@@ -13,10 +13,7 @@ export class JwtAuthGuard implements CanActivate {
       context.getClass(),
     ]);
 
-    console.log("🔑 Required Roles:", requiredRoles);
-
     const request = context.switchToHttp().getRequest<Request & { user?: any }>();
-
     const token = this.extractTokenFromHeader(request);
 
     if (!token) {
@@ -24,15 +21,13 @@ export class JwtAuthGuard implements CanActivate {
     }
 
     try {
-      const payload = this.jwtService.verify(token); // Validate the token
-      request.user = payload; // Attach payload to request
+      const payload = this.jwtService.verify(token);
+      request.user = payload;
     } catch (error) {
       throw new UnauthorizedException('Invalid or expired token');
     }
 
     const user = request.user;
-
-    console.log("🔑 User from token:", user);
 
     if (requiredRoles && (!user || !requiredRoles.includes(user.role))) {
       throw new UnauthorizedException('You do not have permission to access this resource');
@@ -44,9 +39,8 @@ export class JwtAuthGuard implements CanActivate {
   private extractTokenFromHeader(request: Request): string | undefined {
     const authHeader = request.headers['authorization'];
     if (authHeader && authHeader.startsWith('Bearer ')) {
-      return authHeader.slice(7); // Remove "Bearer " prefix
+      return authHeader.slice(7);
     }
     return undefined;
- 
   }
 }
