@@ -5,6 +5,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import * as Joi from 'joi';
 import { UserModule } from './modules/user/user.module';
+import { DocumentModule } from './modules/document/document.module';
+import { CloudinaryProvider } from './modules/utils/cloudinary.config';
 
 @Module({
   imports: [
@@ -34,8 +36,11 @@ import { UserModule } from './modules/user/user.module';
       }),
     }),
     UserModule,
+    DocumentModule 
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService,CloudinaryProvider],
+  exports: [CloudinaryProvider],  // ✅ Export CloudinaryProvider for injection
+
 })
 export class AppModule {}

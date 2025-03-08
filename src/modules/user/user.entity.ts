@@ -1,6 +1,7 @@
 // src/users/user.entity.ts
-import { Entity, Column, PrimaryGeneratedColumn, OneToOne } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, OneToOne, OneToMany } from 'typeorm';
 
+import { Document } from '../document/document.entity';
 export enum Role {
   ADMIN = 'admin',
   EDITOR = 'editor',
@@ -40,5 +41,6 @@ export class User {
   @Column({ nullable: true })
   phone: string;
 
-  
+  @OneToMany(() => Document, (document) => document.user, { cascade: true }) // ✅ Correct relation
+  documents: Document[];
 }
