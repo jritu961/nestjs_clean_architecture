@@ -46,7 +46,7 @@ export class UserController {
 
   @Put('update/:id')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @ApiOperation({ summary: 'Update user details (Admin only)' })
+  @ApiOperation({ summary: 'Update user details Amin and Editor' })
   @ApiBearerAuth()
   @Roles('admin', 'editor')
   @ApiBody({ type: UpdateUserDto }) // Ensure Swagger shows the body input
@@ -66,7 +66,7 @@ export class UserController {
   @Get(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin', 'editor', 'viewer')
-  @ApiOperation({ summary: 'Get user by ID' })
+  @ApiOperation({ summary: 'Get user by ID (admin,editor,viewer' })
   @ApiBearerAuth()
   async getUserById(@Param('id') id: number) {
     return this.userService.getUserById(id);
