@@ -58,6 +58,10 @@ This project is a document management system built with NestJS and TypeScript, f
 
 
 - **Ingestion APIs**
+     ```sh
+   cd mock-service
+   node mock-service.js
+   ```
   - `/ingestions/trigger`: Trigger document ingestion.
   - `/ingestions/:id/status`: Check ingestion status by ID.
   - `/ingestions/:id/embeddings`: Retrieve embeddings for a document by ID.

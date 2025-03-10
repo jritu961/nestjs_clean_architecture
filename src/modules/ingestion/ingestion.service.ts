@@ -1,37 +1,65 @@
+import { HttpService } from '@nestjs/axios';
 import { Injectable } from '@nestjs/common';
+import { firstValueFrom } from 'rxjs';
 
-export interface IngestionStatus { // ✅ Make sure this interface is exported
+export interface IngestionStatus {
   status: 'Processing' | 'Completed' | 'Failed';
   embeddings?: number[];
-  id?:number
+  id?: number;
 }
 
 @Injectable()
 export class IngestionService {
   private ingestionStore: Record<number, IngestionStatus> = {};
 
-  async triggerIngestion(documentId: number): Promise<IngestionStatus> { // ✅ Explicit return type
-    this.ingestionStore[documentId] = { status: 'Processing' };
+  constructor(private readonly httpService: HttpService) {}
 
-    setTimeout(() => {
-      const isSuccess = Math.random() > 0.2;
-      this.ingestionStore[documentId] = {
-        status: isSuccess ? 'Completed' : 'Failed',
-        embeddings: isSuccess ? this.generateMockEmbeddings() : undefined,
-      };
-    }, 5000);
+  /**
+   * Trigger ingestion for a document via mock service
+   * @param documentId - The ID of the document to ingest
+   * @returns {IngestionStatus} - Initial status of the ingestion
+   */
+  async triggerIngestion(documentId: number): Promise<IngestionStatus> {
+    try {
+      const response = await firstValueFrom(
+        this.httpService.post('http://localhost:3001/api/ingest', { documentId }),
+      );
 
-    return { status: 'Processing', id:documentId };
+      if (response.data.success) {
+        this.ingestionStore[documentId] = { status: 'Processing', id: documentId };
+      } else {
+        this.ingestionStore[documentId] = { status: 'Failed', id: documentId };
+      }
+
+      return this.ingestionStore[documentId];
+    } catch (error) {
+      console.error('Ingestion failed:', error.message);
+      return { status: 'Failed', id: documentId };
+    }
   }
 
-  async checkIngestionStatus(documentId: number): Promise<IngestionStatus | { status: 'Not Found' }> { // ✅ Explicit return type
+  /**
+   * Check the status of an ingestion
+   * @param documentId - The ID of the document to check
+   * @returns {IngestionStatus | { status: 'Not Found' }} - Status or 'Not Found'
+   */
+  async checkIngestionStatus(documentId: number): Promise<IngestionStatus | { status: 'Not Found' }> {
     return this.ingestionStore[documentId] || { status: 'Not Found' };
   }
 
-  async getMockEmbeddings(documentId: number): Promise<number[] | { message: string }> { // ✅ Explicit return type
+  /**
+   * Retrieve embeddings for a document
+   * @param documentId - The ID of the document to retrieve embeddings for
+   * @returns {number[] | { message: string }} - Embeddings or a message
+   */
+  async getMockEmbeddings(documentId: number): Promise<number[] | { message: string }> {
     return this.ingestionStore[documentId]?.embeddings || { message: 'Embeddings not available' };
   }
 
+  /**
+   * Generate random mock embeddings
+   * @returns {number[]} - An array of random numbers
+   */
   private generateMockEmbeddings(): number[] {
     return Array.from({ length: 10 }, () => Math.random());
   }
