@@ -64,7 +64,6 @@ This project is a document management system built with NestJS and TypeScript, f
    ```
   - `/ingestions/trigger`: Trigger document ingestion.
   - `/ingestions/:id/status`: Check ingestion status by ID.
-  - `/ingestions/:id/embeddings`: Retrieve embeddings for a document by ID.
 
 
 ## Testing & Documentation

@@ -47,20 +47,4 @@ export class IngestionService {
     return this.ingestionStore[documentId] || { status: 'Not Found' };
   }
 
-  /**
-   * Retrieve embeddings for a document
-   * @param documentId - The ID of the document to retrieve embeddings for
-   * @returns {number[] | { message: string }} - Embeddings or a message
-   */
-  async getMockEmbeddings(documentId: number): Promise<number[] | { message: string }> {
-    return this.ingestionStore[documentId]?.embeddings || { message: 'Embeddings not available' };
-  }
-
-  /**
-   * Generate random mock embeddings
-   * @returns {number[]} - An array of random numbers
-   */
-  private generateMockEmbeddings(): number[] {
-    return Array.from({ length: 10 }, () => Math.random());
-  }
 }

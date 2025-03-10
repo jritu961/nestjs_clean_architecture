@@ -28,10 +28,4 @@ export class IngestionController {
     return this.ingestionService.checkIngestionStatus(id);
   }
 
-  @Get(':id/embeddings')
-  @ApiOperation({ summary: 'Retrieve embeddings for a document by ID' })
-  @ApiParam({ name: 'id', type: 'number', example: 1 })
-  async getEmbeddings(@Param('id') id: number) {
-    return this.ingestionService.getMockEmbeddings(id);
-  }
 }
