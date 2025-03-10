@@ -72,11 +72,5 @@ export class UserController {
     return this.userService.getUserById(id);
   }
 
-  @Get('profile')
-  @UseGuards(JwtAuthGuard)
-  @ApiOperation({ summary: 'Get logged-in user profile' })
-  @ApiBearerAuth()
-  async getProfile(@Request() req) {
-    return this.userService.getUserById(req.user.sub);
-  }
+
 }
